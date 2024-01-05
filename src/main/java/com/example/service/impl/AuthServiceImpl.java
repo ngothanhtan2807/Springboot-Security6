@@ -6,6 +6,7 @@ import com.example.dto.request.RegisterRequest;
 import com.example.dto.response.AuthResponse;
 import com.example.entity.Token;
 import com.example.entity.User;
+import com.example.helper.SecurityContextHelper;
 import com.example.repository.TokenRepository;
 import com.example.repository.UserRepository;
 import com.example.service.AuthService;
@@ -15,6 +16,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,8 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final SecurityContextHelper helper;
+    private final UserDetailsService userDetailsService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -71,13 +76,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse authenticate(AuthRequest request) {
+        System.out.println(1111);
+        System.out.println(request.getUsername() + " " + request.getPassword());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        System.out.println(22222);
         var user  = userRepository.findByUsername(request.getUsername()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserToken(user);
         saveUserToken(user, jwtToken);
 
+        System.out.println("---------------------------------"+helper.getUserDetails().getUsername());
         return AuthResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
@@ -96,8 +105,8 @@ public class AuthServiceImpl implements AuthService {
         refreshToken = header.substring(7);
         username = jwtService.extractUsername(refreshToken);
         if(username != null){
-            var user = userRepository.findByUsername(username).orElseThrow();
-            if(jwtService.isTokenValid(refreshToken, user)){
+            var user = userRepository.findByUsername(username).get();
+            if(jwtService.isTokenValid(refreshToken, (UserDetails) user)){
                 var accessToken = jwtService.generateToken(user);
                 revokeAllUserToken(user);
                 saveUserToken(user, accessToken);
