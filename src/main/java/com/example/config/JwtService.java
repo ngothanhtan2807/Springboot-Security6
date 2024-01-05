@@ -1,5 +1,6 @@
 package com.example.config;
 
+import com.example.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,23 +23,23 @@ public class JwtService {
     @Value("${jwt.refresh-ExpirationMs}")
     private long refreshExpiration;
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    public String generateToken(User user) {
+        return generateToken(new HashMap<>(), user);
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+    public String generateRefreshToken(User user) {
+        return buildToken(new HashMap<>(), user, refreshExpiration);
     }
 
-    public String generateToken(Map<String, Object> extractClaim, UserDetails userDetails) {
-        return buildToken(extractClaim, userDetails, jwtExpiration);
+    public String generateToken(Map<String, Object> extractClaim, User user) {
+        return buildToken(extractClaim, user, jwtExpiration);
     }
 
-    public String buildToken(Map<String, Object> extractClaims, UserDetails userDetails, long expiration) {
+    public String buildToken(Map<String, Object> extractClaims, User user, long expiration) {
         return Jwts
                 .builder()
                 .setClaims(extractClaims)
-                .setSubject(userDetails.getUsername())
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
