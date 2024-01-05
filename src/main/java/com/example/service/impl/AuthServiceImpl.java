@@ -76,17 +76,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse authenticate(AuthRequest request) {
-        System.out.println(1111);
-        System.out.println(request.getUsername() + " " + request.getPassword());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        System.out.println(22222);
-        var user  = userRepository.findByUsername(request.getUsername()).orElseThrow();
+        var user = userRepository.findByUsername(request.getUsername()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserToken(user);
         saveUserToken(user, jwtToken);
 
-        System.out.println("---------------------------------"+helper.getUserDetails().getUsername());
         return AuthResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
@@ -96,17 +92,17 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String header = request.getHeader("Authorization");
-        System.out.println("header: "+ header);
+        System.out.println("header: " + header);
         final String refreshToken;
         final String username;
-        if(header == null || !header.startsWith("Bearer ")){
+        if (header == null || !header.startsWith("Bearer ")) {
             return;
         }
         refreshToken = header.substring(7);
         username = jwtService.extractUsername(refreshToken);
-        if(username != null){
+        if (username != null) {
             var user = userRepository.findByUsername(username).get();
-            if(jwtService.isTokenValid(refreshToken, (UserDetails) user)){
+            if (jwtService.isTokenValid(refreshToken, (UserDetails) user)) {
                 var accessToken = jwtService.generateToken(user);
                 revokeAllUserToken(user);
                 saveUserToken(user, accessToken);
