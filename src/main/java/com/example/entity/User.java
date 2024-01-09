@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends CommonEntity {
+public class User extends TimeAuditing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -23,6 +23,9 @@ public class User extends CommonEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;

@@ -1,0 +1,32 @@
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  jwtExpirationMs: 2000000
+  refresh-ExpirationMs: 2000000000
+
+spring:
+  datasource:
+    username: root
+    password:
+    url: jdbc:mysql://localhost:3306/demo
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    #hibernate jpa
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  application:
+    name: Spring-boot 6
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 119996083385-ndrdk1bacud0jcs82i42dbvp2ldsk99v.apps.googleusercontent.com
+            clientSecret: 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
+            scope:
+              - email
+              - profile
