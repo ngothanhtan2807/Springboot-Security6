@@ -1,9 +1,12 @@
 package com.example.service.impl;
 
-import com.example.config.JwtService;
+import com.example.config.google.CustomOAuth2User;
+import com.example.config.security.JwtService;
 import com.example.dto.request.AuthRequest;
 import com.example.dto.request.RegisterRequest;
 import com.example.dto.response.AuthResponse;
+import com.example.entity.Provider;
+import com.example.entity.Role;
 import com.example.entity.Token;
 import com.example.entity.User;
 import com.example.helper.SecurityContextHelper;
@@ -22,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextHelper helper;
     private final UserDetailsService userDetailsService;
+    private final ObjectMapper objectMapper;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -42,6 +48,7 @@ public class AuthServiceImpl implements AuthService {
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .provider(Provider.LOCAL)
                 .build();
         var savedUser = userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
@@ -55,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    private void saveUserToken(User user, String jwtToken) {
+    public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
                 .user(user)
                 .token(jwtToken)
@@ -114,4 +121,29 @@ public class AuthServiceImpl implements AuthService {
             }
         }
     }
+//    public void processOAuthPostLogin(CustomOAuth2User oAuth2User, HttpServletResponse response) throws IOException {
+//        var existUser = userRepository.findByUsername(oAuth2User.getEmail());
+//        System.out.println(oAuth2User.getAttributes());
+//        if (existUser.isEmpty()) {
+//            User newUser = new User();
+//            newUser.setUsername(oAuth2User.getEmail());
+//            newUser.setProvider(Provider.GOOGLE);
+//            newUser.setRole(Role.USER);
+//            newUser.setFirstName(oAuth2User.getAttribute("given_name"));
+//            newUser.setLastName(oAuth2User.getAttribute("family_name"));
+//            var savedUser = userRepository.save(newUser);
+//            System.out.println("Created new user: " + oAuth2User.getEmail());
+//
+//            var jwtToken = jwtService.generateToken(newUser);
+//            var refreshToken = jwtService.generateRefreshToken(newUser);
+//
+//            saveUserToken(savedUser, jwtToken);
+//            Map<String, Object> body = new HashMap<>();
+//            body.put("accessToken", jwtToken);
+//            body.put("refreshToken", refreshToken);
+//            objectMapper.writeValue(response.getOutputStream(), body);
+//
+//        }
+//
+//    }
 }
