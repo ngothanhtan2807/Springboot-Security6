@@ -16,7 +16,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
   application:
     name: Spring-boot 6
@@ -30,3 +30,5 @@ spring:
             scope:
               - email
               - profile
+server:
+  port: 9411
