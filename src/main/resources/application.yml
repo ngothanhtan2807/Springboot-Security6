@@ -30,3 +30,5 @@ spring:
             scope:
               - email
               - profile
+server:
+  port: 9411
